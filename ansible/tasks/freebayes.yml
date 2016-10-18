@@ -1,0 +1,22 @@
+---
+- name: download freebayes
+  git:
+    repo: https://github.com/wtsi-npg/freebayes.git
+    version: "{{ freebayes_version }}"
+    dest: /home/ubuntu/freebayes
+    force: yes
+    recursive: yes
+  register: new_freebayes_repo
+- name: make freebayes
+  make:
+    chdir: /home/ubuntu/freebayes
+    params:
+      BAMTOOLS_ARGS: "-DEnableNodeJS=/bin/true"
+  when: new_freebayes_repo|changed
+- name: install freebayes
+  make:
+    chdir: /home/ubuntu/freebayes
+    target: install
+  become: yes
+  when: new_freebayes_repo|changed
+...

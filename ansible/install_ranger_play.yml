@@ -1,0 +1,49 @@
+---
+- hosts: all
+  remote_user: ubuntu
+  vars:
+    nodejs_version: 4.5.0
+    mongodb_version: 3.2.4
+    htslib_version: 1.3.1-npg-Apr2016
+    samtools_version: 1.3.1-npg-May2016
+    biobambam2_version: 2.0.50-release-20160705161609
+    freebayes_version: v1.0.2-npg-Aug2016
+    ranger_version: 0.4.0
+
+  tasks:
+  - name: update apt cache
+    apt: update_cache=yes
+    become: yes
+  - name: install autoconf
+    apt: name=autoconf state=installed
+    become: yes
+  - name: install build-essential
+    apt: name=build-essential state=installed
+    become: yes
+  - name: install cmake
+    apt: name=cmake state=installed
+    become: yes
+  - name: install git
+    apt: name=git state=installed
+    become: yes
+  - name: install pkg-config
+    apt: name=pkg-config state=installed
+    become: yes
+  - name: install unzip
+    apt: name=unzip state=installed
+    become: yes
+  - name: install wget
+    apt: name=wget state=installed
+    become: yes
+  - name: install zlib1g-dev
+    apt: name=zlib1g-dev state=installed
+    become: yes
+
+  - include: tasks/nodejs.yml
+  - include: tasks/mongodb.yml
+  - include: tasks/htslib.yml
+  - include: tasks/samtools.yml
+  - include: tasks/biobambam2.yml
+  - include: tasks/freebayes.yml
+  - include: tasks/ranger.yml
+...
