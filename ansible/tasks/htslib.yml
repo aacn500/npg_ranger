@@ -3,21 +3,21 @@
   git:
     repo: https://github.com/wtsi-npg/htslib.git
     version: "{{ htslib_version }}"
-    dest: /home/ubuntu/htslib
-    force: yes
+    dest: "{{ user_home.stdout }}/htslib"
+    update: no
   register: new_htslib_repo
 - name: htslib autoreconf
   command: /usr/bin/autoreconf
   args:
-    chdir: /home/ubuntu/htslib
+    chdir: "{{ user_home.stdout }}/htslib"
   when: new_htslib_repo|changed
 - name: htslib configure
-  command: /home/ubuntu/htslib/configure --enable-plugins
+  command: "{{ user_home.stdout }}/htslib/configure --enable-plugins"
   args:
-    chdir: /home/ubuntu/htslib
+    chdir: "{{ user_home.stdout }}/htslib"
   when: new_htslib_repo|changed
 - name: htslib make
   make:
-    chdir: /home/ubuntu/htslib
+    chdir: "{{ user_home.stdout }}/htslib"
   when: new_htslib_repo|changed
 ...

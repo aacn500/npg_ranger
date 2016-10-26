@@ -1,9 +1,10 @@
 - name: download nodejs
   get_url:
     url: "https://nodejs.org/dist/v{{ nodejs_version }}/node-v{{ nodejs_version }}-linux-x64.tar.xz"
-    dest: "/home/ubuntu/node-v{{ nodejs_version }}-linux-x64.tar.xz"
+    dest: "{{ user_home.stdout }}/node-v{{ nodejs_version }}-linux-x64.tar.xz"
   register: new_node_archive
 - name: install nodejs
-  command: "/bin/tar xJf /home/ubuntu/node-v{{ nodejs_version }}-linux-x64.tar.xz -C /usr/local --strip-components=1"
+  command: "/bin/tar xJf {{ user_home.stdout }}/node-v{{ nodejs_version }}-linux-x64.tar.xz -C /usr/local --strip-components=1"
   become: yes
+  become_user: root
   when: new_node_archive|changed

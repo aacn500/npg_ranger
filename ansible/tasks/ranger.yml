@@ -3,14 +3,19 @@
   git:
     repo: https://github.com/wtsi-npg/npg_ranger.git
     version: "{{ ranger_version }}"
-    dest: /home/ubuntu/npg_ranger
-    force: yes
+    dest: "{{ user_home.stdout }}/npg_ranger"
+    update: no
   register: new_ranger_repo
 - name: install grunt-cli
   npm:
     global: yes
     name: grunt-cli
   become: yes
+  become_user: root
 - name: install npm dependencies
-  npm: path=/home/ubuntu/npg_ranger
+  npm:
+    path:
+      "{{ user_home.stdout }}/npg_ranger"
+- name: delete troublesome line
+  command: ex +g/process\.env\.USER/d -cwq {{ user_home.stdout }}/npg_ranger/bin/server.js
 ...

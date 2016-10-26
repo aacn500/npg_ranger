@@ -3,20 +3,21 @@
   git:
     repo: https://github.com/wtsi-npg/freebayes.git
     version: "{{ freebayes_version }}"
-    dest: /home/ubuntu/freebayes
-    force: yes
+    dest: "{{ user_home.stdout }}/freebayes"
+    update: no
     recursive: yes
   register: new_freebayes_repo
 - name: make freebayes
   make:
-    chdir: /home/ubuntu/freebayes
+    chdir: "{{ user_home.stdout }}/freebayes"
     params:
       BAMTOOLS_ARGS: "-DEnableNodeJS=/bin/true"
   when: new_freebayes_repo|changed
 - name: install freebayes
   make:
-    chdir: /home/ubuntu/freebayes
+    chdir: "{{ user_home.stdout }}/freebayes"
     target: install
   become: yes
+  become_user: root
   when: new_freebayes_repo|changed
 ...

@@ -1,9 +1,10 @@
 - name: download mongodb
   get_url:
     url: "http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-{{ mongodb_version }}.tgz"
-    dest: "/home/ubuntu/mongodb-linux-x86_64-{{ mongodb_version }}.tgz"
+    dest: "{{ user_home.stdout }}/mongodb-linux-x86_64-{{ mongodb_version }}.tgz"
   register: new_mongo_archive
 - name: unarchive mongodb
-  command: /bin/tar xf /home/ubuntu/mongodb-linux-x86_64-{{ mongodb_version }}.tgz -C /usr/local --strip-components=1
+  command: /bin/tar xf {{ user_home.stdout }}/mongodb-linux-x86_64-{{ mongodb_version }}.tgz -C /usr/local --strip-components=1
   become: yes
+  become_user: root
   when: new_mongo_archive|changed

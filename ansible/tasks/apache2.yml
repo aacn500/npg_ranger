@@ -1,0 +1,57 @@
+---
+
+- name: get httpd
+  get_url:
+    url: "http://mirrors.ukfast.co.uk/sites/ftp.apache.org//httpd/httpd-{{ httpd_version }}.tar.gz"
+    dest: "{{ user_home.stdout }}/httpd-{{ httpd_version }}.tar.gz"
+  register: new_httpd_archive
+- name: extract httpd
+  command: /bin/tar xf {{ user_home.stdout }}/httpd-{{ httpd_version }}.tar.gz
+  args:
+    chdir: "{{ user_home.stdout }}"
+
+- name: mkdirs for apr and apr-util
+  file:
+    name: "{{ user_home.stdout }}/httpd-{{ httpd_version }}/srclib/{{ item }}"
+    state: directory
+  with_items:
+    - apr
+    - apr-util
+
+- name: get apr
+  get_url:
+    url: "http://mirrors.ukfast.co.uk/sites/ftp.apache.org//apr/apr-{{ apr_version }}.tar.gz"
+    dest: "{{ user_home.stdout }}/apr-{{ apr_version }}.tar.gz"
+- name: extract apr
+  command: /bin/tar xf {{ user_home.stdout }}/apr-{{ apr_version }}.tar.gz -C {{ user_home.stdout }}/httpd-{{ httpd_version }}/srclib/apr --strip-components 1
+
+- name: get apr-util
+  get_url:
+    url: "http://mirrors.ukfast.co.uk/sites/ftp.apache.org//apr/apr-util-{{ apr_util_version }}.tar.gz"
+    dest: "{{ user_home.stdout }}/apr-util-{{ apr_util_version }}.tar.gz"
+- name: extract apr-util
+  command: /bin/tar xf {{ user_home.stdout }}/apr-util-{{ apr_util_version }}.tar.gz -C {{ user_home.stdout }}/httpd-{{ httpd_version }}/srclib/apr-util --strip-components 1
+
+- name: get pcre
+  apt: name=libpcre3-dev state=installed
+  become: yes
+  become_user: root
+- name: get openssl
+  apt: name=libssl-dev state=installed
+  become: yes
+  become_user: root
+
+- name: configure httpd
+  command: "{{ user_home.stdout }}/httpd-{{ httpd_version }}/configure --with-included-apr --with-pcre=${HOME}/pcre-8.39/pcre-config --enable-load-all-modules --prefix=${HOME}/apache_build"
+  args:
+    chdir: "{{ user_home.stdout }}/httpd-{{ httpd_version }}"
+- name: make httpd
+  make:
+    chdir: "{{ user_home.stdout }}/httpd-{{ httpd_version }}"
+- name: install httpd
+  make:
+    chdir: "{{ user_home.stdout }}/httpd-{{ httpd_version }}"
+    target: install
+
+- name: 
+...

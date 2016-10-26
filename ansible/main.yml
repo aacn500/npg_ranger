@@ -1,0 +1,88 @@
+---
+- name: prep & add user
+  hosts: ranger
+  gather_facts: no
+
+  tasks:
+  - block:
+    - name: update apt cache
+      raw: apt-get update
+    - name: get python
+      raw: which python || apt-get install -qy python python-apt
+
+- name: install ranger
+  hosts: ranger
+  vars:
+    nodejs_version: 4.6.1
+    mongodb_version: 3.2.10
+    htslib_version: 1.3.1-npg-Apr2016
+    samtools_version: 1.3.1-npg-May2016
+    biobambam2_version: 2.0.50-release-20160705161609
+    freebayes_version: v1.0.2-npg-Aug2016
+    ranger_version: 0.4.0
+    httpd_version: 2.4.23
+    apr_version: 1.5.2
+    apr_util_version: 1.5.4
+    pcre_version: 8.39
+
+  tasks:
+  - block:
+    - name: install acl
+      apt: name=acl state=installed
+    - name: install autoconf
+      apt: name=autoconf state=installed
+    - name: install build-essential
+      apt: name=build-essential state=installed
+    - name: install cmake
+      apt: name=cmake state=installed
+    - name: install git
+      apt: name=git state=installed
+    - name: install pkg-config
+      apt: name=pkg-config state=installed
+    - name: install unzip
+      apt: name=unzip state=installed
+    - name: install wget
+      apt: name=wget state=installed
+    - name: install zlib1g-dev
+      apt: name=zlib1g-dev state=installed
+    become: yes
+
+  - name: find homedir
+    shell: >
+      getent passwd {{ remote_user }} | cut -d: -f6
+    changed_when: false
+    register: user_home
+
+  - name: show homedir
+    debug:
+      msg: "{{ user_home.stdout }}"
+  - block:
+    - include: tasks/nodejs.yml
+    - include: tasks/mongodb.yml
+    - include: tasks/htslib.yml
+    - include: tasks/samtools.yml
+    - include: tasks/biobambam2.yml
+    - include: tasks/freebayes.yml
+    - include: tasks/ranger.yml
+    - include: tasks/apache2.yml
+    - name: copy ranger config file
+      copy:
+        src: "config.json"
+        dest: "{{ user_home.stdout }}/npg_ranger/config.json"
+    become: yes
+
+
+- name: setup apache config file
+  gather_facts: no
+  hosts: rangerproxy
+  tasks:
+  - name: update apt cache
+    raw: apt-get update
+  - name: get python
+    raw: which python || apt-get install -qy python python-apt
+  - name: copy config file
+    copy:
+      src: "files/httpd.conf"
+      remote_src: no
+      dest: "/usr/local/apache2/conf/httpd.conf"
+...

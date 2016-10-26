@@ -3,42 +3,46 @@
   git:
     repo: https://github.com/wtsi-npg/samtools.git
     version: "{{ samtools_version }}"
-    dest: /home/ubuntu/samtools
-    force: yes
+    dest: "{{ user_home.stdout }}/samtools"
+    update: no
   register: new_samtools_repo
 - name: mkdir acinclude.m4
-  file: path=/home/ubuntu/samtools/acinclude.m4/ state=directory
+  file: path={{ user_home.stdout }}/samtools/acinclude.m4/ state=directory
   when: new_samtools_repo|changed
 - name: "get extra samtools macros: ax_with_htslib.m4"
   get_url:
     url: "https://github.com/samtools/samtools/files/62424/ax_with_htslib.m4.txt"
-    dest: /home/ubuntu/samtools/acinclude.m4/ax_with_htslib.m4
+    dest: "{{ user_home.stdout }}/samtools/acinclude.m4/ax_with_htslib.m4"
   when: new_samtools_repo|changed
 - name: "get extra samtools macros: ax_with_curses.m4"
   get_url:
     url: "http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_with_curses.m4;hb=0351b066631215b4fdc3c672a8ef90b233687655"
-    dest: /home/ubuntu/samtools/acinclude.m4/ax_with_curses.m4
+    dest: "{{ user_home.stdout }}/samtools/acinclude.m4/ax_with_curses.m4"
   when: new_samtools_repo|changed
 - name: Generate aclocal.m4
   command: /usr/bin/aclocal -I acinclude.m4
   args:
-    chdir: /home/ubuntu/samtools
+    chdir: "{{ user_home.stdout }}/samtools"
   when: new_samtools_repo|changed
 - name: Perform autoreconfigure
   command: /usr/bin/autoreconf -fi
   args:
-    chdir: /home/ubuntu/samtools
+    chdir: "{{ user_home.stdout }}/samtools"
   when: new_samtools_repo|changed
 - name: Perform configure
-  command: /home/ubuntu/samtools/configure --enable-plugins --without-curses
+  command: "{{ user_home.stdout }}/samtools/configure --enable-plugins --without-curses"
   args:
-    chdir: /home/ubuntu/samtools
+    chdir: "{{ user_home.stdout }}/samtools"
   when: new_samtools_repo|changed
 - name: Make samtools
-  make: chdir=/home/ubuntu/samtools
+  make:
+    chdir: "{{ user_home.stdout }}/samtools"
   when: new_samtools_repo|changed
 - name: Install samtools
-  make: chdir=/home/ubuntu/samtools target=install
+  make:
+    chdir: "{{ user_home.stdout }}/samtools"
+    target: install
   become: yes
+  become_user: root
   when: new_samtools_repo|changed
 ...

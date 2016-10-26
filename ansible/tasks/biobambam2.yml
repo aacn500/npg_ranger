@@ -2,10 +2,11 @@
 - name: download biobambam2
   get_url:
     url: "https://github.com/gt1/biobambam2/releases/download/{{ biobambam2_version }}/biobambam2-{{ biobambam2_version }}-x86_64-etch-linux-gnu.tar.gz"
-    dest: /home/ubuntu/biobambam2.tar.gz
+    dest: "{{ user_home.stdout }}/biobambam2.tar.gz"
   register: new_biobambam_archive
 - name: install biobambam2
-  command: /bin/tar xf /home/ubuntu/biobambam2.tar.gz -C /usr/local --strip-components=1
+  command: /bin/tar xf {{ user_home.stdout }}/biobambam2.tar.gz -C /usr/local --strip-components=1
   become: yes
+  become_user: root
   when: new_biobambam_archive|changed
 ...
