@@ -6,11 +6,11 @@ Simply `cd` to this directory, and then run
 
 The server should now be running on localhost:9090, although the database is empty.
 
-To populate the database, using the test data provided with the main server as an example:
+To populate the database, using an example fileinfo.json which provides metadata for the test data provided with the main server as an example:
 
 ```
 docker-compose up -d
-cp ../test/server/data/fixtures/fileinfo.json ./rangerdb/volume/
+cp ./rangerdb/fileinfo.json ./rangerdb/volume/
 docker exec docker_rangerdb_1 mongoimport --db imetacache --collection fileinfo --jsonArray --file /data/db/fileinfo.json
 ```
 
