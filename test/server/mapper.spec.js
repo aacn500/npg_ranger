@@ -99,7 +99,7 @@ describe('Data info retrieval', function() {
           expect(reason).toBe('No reference for 10000_1#58_phix.bam');
           done();
         });
-        dm.getFileInfo({name: "10000_1#58_phix.bam"}, 'localhost');
+        dm.getFileInfo({name: "10000_1#58_phix.bam", format: "VCF"}, 'localhost');
       });
     });
   });
