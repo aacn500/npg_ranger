@@ -265,14 +265,31 @@ function logBioinfToolVersions() {
         p.on('error', (err) => {
           reject(err);
         });
-        p.on('exit', () => {
+        p.on('close', () => {
           resolve(body);
+        });
+      })
+      .then(function(value) {
+        return new Promise(function(resolve, reject) {
+          let body = value + processName + ' path: ';
+          let p = child.spawn('which', [processName]);
+          p.stdout.on('data', (data) => {
+            body += data.toString();
+          });
+          p.on('error', (err) => {
+            reject(err);
+          });
+          p.on('close', () => {
+            resolve(body);
+          });
         });
       })
       .catch(function(reason) {
         LOGGER.error('failed to capture ' + processName + ' version: ' + reason.toString());
       });
     });
+  // Wait for all version information to be returned before logging;
+  // keeps all lines together and easy to find.
   Promise.all(processes).then(function(values) {
     values.forEach(function(versionOutput) {
       LOGGER.info(versionOutput);

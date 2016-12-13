@@ -24,5 +24,9 @@ before_install:
   - npm install -g npm@3.10.7
   - npm --version
   - npm install -g grunt-cli
+  - samtools --version
+  - freebayes --version
+  - bamstreamingmarkduplicates --version
+  - mongo --version
 script:
   - grunt -v
