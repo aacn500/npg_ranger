@@ -4,6 +4,7 @@
 
 const EventEmitter = require('events');
 const assert       = require('assert');
+const child        = require('child_process');
 const LOGGER       = require('../lib/logsetup.js');
 
 const config       = require('../lib/config.js');
@@ -117,6 +118,7 @@ class FlatBroker extends Broker {
   start() {
     super.start();
     LOGGER.info(config.logOpts());
+    logBioinfToolVersions();
     this.serverFactory.verifySocket();
     this.serverFactory.startServer();
   }
@@ -160,7 +162,7 @@ class ClusteredBroker extends Broker {
     let self = this;
     if ( cluster.isMaster ) {
       LOGGER.info(config.logOpts());
-
+      logBioinfToolVersions();
       this.serverFactory.verifySocket();
 
       let consec = 0;
@@ -246,6 +248,36 @@ class BrokerFactory {
       ? new ClusteredBroker(serverFactory, this.numWorkers, this.maxConsec, this.waitingConsec)
       : new FlatBroker(serverFactory);
   }
+}
+
+function logBioinfToolVersions() {
+  let processes = ['node', 'samtools', 'bamstreamingmarkduplicates', 'freebayes']
+    .map(function(processName) {
+      return new Promise(function(resolve, reject) {
+        let body = processName + ' version: ';
+        let p = child.spawn(processName, ['--version']);
+        p.stdout.on('data', (data) => {
+          body += data.toString();
+        });
+        p.stderr.on('data', (data) => {
+          body += data.toString();
+        });
+        p.on('error', (err) => {
+          reject(err);
+        });
+        p.on('exit', () => {
+          resolve(body);
+        });
+      })
+      .catch(function(reason) {
+        LOGGER.error('failed to capture ' + processName + ' version: ' + reason.toString());
+      });
+    });
+  Promise.all(processes).then(function(values) {
+    values.forEach(function(versionOutput) {
+      LOGGER.info(versionOutput);
+    });
+  });
 }
 
 /**
